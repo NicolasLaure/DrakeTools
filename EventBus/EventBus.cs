@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using DrakeToolbox.Services;
+﻿using DrakeToolbox.Services;
 using DrakeTools.Pool;
 
 namespace DrakeTools.Events

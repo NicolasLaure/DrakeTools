@@ -1,7 +1,8 @@
-﻿namespace DrakeTools.Pool;
-
-public interface IResettable
+﻿namespace DrakeTools.Pool
 {
-    public void Assign(params object[] parameters);
-    public void Reset();
+    public interface IResettable
+    {
+        public void Assign(params object[] parameters);
+        public void Reset();
+    }
 }
