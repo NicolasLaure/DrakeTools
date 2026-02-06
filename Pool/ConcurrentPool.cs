@@ -2,7 +2,7 @@
 
 namespace DrakeTools.Pool
 {
-    public class ConcurrentPool
+    public sealed class ConcurrentPool
     {
         private ConcurrentDictionary<Type, ConcurrentStack<IResettable>> concurrentPool =
             new ConcurrentDictionary<Type, ConcurrentStack<IResettable>>();
