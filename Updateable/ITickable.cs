@@ -2,6 +2,6 @@
 {
     public interface ITickable
     {
-        public void Update(float deltaTime);
+        public void Tick(float deltaTime);
     }
 }
