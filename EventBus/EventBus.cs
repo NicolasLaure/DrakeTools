@@ -1,7 +1,9 @@
-﻿using DrakeToolbox.Services;
-using DrakeTools.Pool;
+﻿using System;
+using System.Collections.Generic;
+using DrakeToolbox.Pool;
+using DrakeToolbox.Services;
 
-namespace DrakeTools.Events
+namespace DrakeToolbox.Events
 {
     public sealed class EventBus : IService
     {

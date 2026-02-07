@@ -1,4 +1,7 @@
-﻿namespace DrakeToolbox.Services
+﻿using System;
+using System.Collections.Generic;
+
+namespace DrakeToolbox.Services
 {
     public sealed class ServiceProvider
     {
@@ -31,7 +34,7 @@
             services.Remove(typeof(ServiceType));
         }
 
-        public ServiceType GetService<ServiceType>(Type serviceType) where ServiceType : class, IService
+        public ServiceType GetService<ServiceType>() where ServiceType : class, IService
         {
             if (!services.ContainsKey(typeof(ServiceType)))
                 throw new KeyNotFoundException();

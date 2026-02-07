@@ -1,6 +1,7 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 
-namespace DrakeTools.Pool
+namespace DrakeToolbox.Pool
 {
     public sealed class ConcurrentPool
     {

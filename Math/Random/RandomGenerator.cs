@@ -1,4 +1,6 @@
-namespace DrakeTools.Math
+using System;
+
+namespace DrakeToolbox.Mathematics
 {
     public static class RandomGenerator
     {

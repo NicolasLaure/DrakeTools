@@ -1,4 +1,4 @@
-﻿namespace DrakeTools.Pool
+﻿namespace DrakeToolbox.Pool
 {
     public interface IResettable
     {

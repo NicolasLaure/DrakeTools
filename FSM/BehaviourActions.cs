@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using DrakeTools.Pool;
+using DrakeToolbox.Pool;
 
-namespace StateMachine
+namespace DrakeToolbox.StateMachine
 {
     public sealed class BehaviourActions : IResettable
     {

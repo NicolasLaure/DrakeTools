@@ -1,3 +1,5 @@
+using System;
+
 namespace DrakeToolbox.Mathematics
 {
     public class Vec4

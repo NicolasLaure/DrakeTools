@@ -1,8 +1,10 @@
-﻿using DrakeToolbox.Services;
-using DrakeTools.Flow;
-using DrakeTools.TaskScheduler.DrakeTools.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using DrakeToolbox.Flow;
+using DrakeToolbox.Services;
+using DrakeToolbox.TaskScheduler.DrakeTools.Tasks;
 
-namespace DrakeTools.Tasks
+namespace DrakeToolbox.Tasks
 {
     public sealed class TaskScheduler : IService, ITickable
     {

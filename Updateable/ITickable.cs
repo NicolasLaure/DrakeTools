@@ -1,4 +1,4 @@
-﻿namespace DrakeTools.Flow
+﻿namespace DrakeToolbox.Flow
 {
     public interface ITickable
     {

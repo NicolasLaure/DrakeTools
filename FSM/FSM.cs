@@ -1,4 +1,8 @@
-namespace StateMachine
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace DrakeToolbox.StateMachine
 {
     public sealed class FSM<StateType, FlagType>
         where StateType : Enum

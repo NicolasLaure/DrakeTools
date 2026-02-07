@@ -1,6 +1,7 @@
-﻿namespace DrakeToolbox.Services;
-
-public interface IService
+﻿namespace DrakeToolbox.Services
 {
-    bool IsPersistent { get; }
+    public interface IService
+    {
+        bool IsPersistent { get; }
+    }
 }

@@ -1,4 +1,6 @@
-﻿namespace DrakeToolbox.Mathematics
+﻿using System;
+
+namespace DrakeToolbox.Mathematics
 {
     [Serializable]
     public struct Vec3 : IEquatable<Vec3>

@@ -1,24 +1,27 @@
-namespace Utils
+using DrakeToolbox.Events;
+using DrakeToolbox.Services;
+
+namespace DrakeToolbox.Console
 {
-    public static class Logger
+    public class Logger : IService
     {
-        public static Action<string> onLog;
-        public static Action<string> onLogError;
-        public static Action<string> onLogWarning;
+        public bool IsPersistent => true;
 
-        public static void Log(string txt)
+        private EventBus EventBus => ServiceProvider.Instance.GetService<EventBus>();
+
+        public void Log(string txt)
         {
-            onLog?.Invoke(txt);
+            EventBus.Raise<OnLogNotificationEvent>(txt);
         }
 
-        public static void LogError(string txt)
+        public void LogError(string txt)
         {
-            onLogError?.Invoke(txt);
+            EventBus.Raise<OnLogErrorNotificationEvent>(txt);
         }
 
-        public static void LogWarning(string txt)
+        public void LogWarning(string txt)
         {
-            onLogWarning?.Invoke(txt);
+            EventBus.Raise<OnLogWarningNotificationEvent>(txt);
         }
     }
 }

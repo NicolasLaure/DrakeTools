@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StateMachine
+namespace DrakeToolbox.StateMachine
 {
     public abstract class State
     {

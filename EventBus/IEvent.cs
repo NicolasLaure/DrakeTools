@@ -1,6 +1,6 @@
-﻿using DrakeTools.Pool;
+﻿using DrakeToolbox.Pool;
 
-namespace DrakeTools.Events
+namespace DrakeToolbox.Events
 {
     public interface IEvent : IResettable
     {
