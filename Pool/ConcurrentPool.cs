@@ -30,7 +30,7 @@ namespace DrakeToolbox.Pool
             return value;
         }
 
-        public void Release<ResettableType>(IResettable instance) where ResettableType : IResettable
+        public void Release<ResettableType>(ResettableType instance) where ResettableType : IResettable
         {
             instance.Reset();
             if (!concurrentPool.ContainsKey(typeof(ResettableType)))
