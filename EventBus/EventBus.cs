@@ -25,6 +25,12 @@ namespace DrakeToolbox.Events
             subscribers[eventType].Add(callback);
         }
 
+        public EventCallback<EventType> AddListenerAndReturn<EventType>(EventCallback<EventType> callback) where EventType : struct, IEvent
+        {
+            AddListener(callback);
+            return callback;
+        }
+
         public void RemoveListener<EventType>(EventCallback<EventType> callback) where EventType : struct, IEvent
         {
             Type eventType = typeof(EventType);
