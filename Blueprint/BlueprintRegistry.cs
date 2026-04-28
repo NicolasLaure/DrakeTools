@@ -46,7 +46,7 @@ namespace DrakeTools.Blueprints
             int maxRow = 0;
             int maxCol = 0;
 
-            for (int row = sheet.FirstRowNum; row < sheet.LastRowNum; row++)
+            for (int row = sheet.FirstRowNum; row <= sheet.LastRowNum; row++)
             {
                 IRow sheetRow = sheet.GetRow(row);
                 if (sheetRow == null)
@@ -70,7 +70,7 @@ namespace DrakeTools.Blueprints
             }
 
             rawContent = new string[maxRow, maxCol];
-            for (int row = 0; row < maxRow; row++)
+            for (int row = sheet.FirstRowNum; row <= sheet.LastRowNum; row++)
             {
                 IRow sheetRow = sheet.GetRow(row);
                 if (sheetRow == null)
@@ -98,7 +98,7 @@ namespace DrakeTools.Blueprints
             parameters = new List<string>();
             for (int i = 1; i < rawContent.GetLength(1); i++)
             {
-                parameters.Add(rawContent[0, 1]);
+                parameters.Add(rawContent[0, i]);
             }
         }
     }
