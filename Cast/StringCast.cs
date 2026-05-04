@@ -14,11 +14,6 @@ namespace DrakeToolbox.Cast
         private static readonly Dictionary<Type, bool> isGenericCollections = new Dictionary<Type, bool>();
         private static readonly Dictionary<Type, bool> isDictionary = new Dictionary<Type, bool>();
 
-        public static T Convert<T>(string value)
-        {
-            return (T)Convert(value, typeof(T));
-        }
-
         public static object Convert(string value, Type targetType)
         {
             try

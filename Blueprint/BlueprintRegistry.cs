@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using DrakeToolbox.Cast;
@@ -34,7 +35,7 @@ namespace DrakeToolbox.Blueprints
 
         public ValueType GetDataAt<ValueType>(string blueprintTable, string blueprintId, string parameter)
         {
-            return StringCast.Convert<ValueType>(blueprintDatas[blueprintTable][blueprintId, parameter]);
+            return (ValueType)StringCast.Convert(blueprintDatas[blueprintTable][blueprintId, parameter], typeof(ValueType));
         }
     }
 }

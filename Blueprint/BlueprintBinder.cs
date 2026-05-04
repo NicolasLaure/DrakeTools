@@ -1,9 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using DrakeToolbox.Services;
 using DrakeToolbox.Cast;
-using DrakeToolbox.Reflection;
+using DrakeToolbox.Services;
 
 namespace DrakeToolbox.Blueprints
 {
@@ -29,7 +29,7 @@ namespace DrakeToolbox.Blueprints
             {
                 foreach (FieldInfo field in GetFields(instanceType))
                 {
-                    if (!field.FieldType.IsPrimitive && field.FieldType != typeof(string))
+                    if (!field.FieldType.IsPrimitive && !typeof(IEnumerable).IsAssignableFrom(field.FieldType) && !field.FieldType.IsArray && field.FieldType != typeof(string))
                     {
                         object classFieldValue = field.GetValue(instance);
                         Apply(ref classFieldValue, blueprintTable, blueprintId);
@@ -62,9 +62,9 @@ namespace DrakeToolbox.Blueprints
 
         private (bool hasAttribute, BlueprintParameterAttribute attribute) GetBlueprintParameterAttribute(FieldInfo field)
         {
-            bool contains = false;
             if (!attributeInFields.ContainsKey(field))
             {
+                bool contains = false;
                 foreach (Attribute attribute in field.GetCustomAttributes())
                 {
                     if (attribute is BlueprintParameterAttribute)
@@ -74,11 +74,11 @@ namespace DrakeToolbox.Blueprints
                         break;
                     }
                 }
-            }
 
-            if (!contains)
-            {
-                attributeInFields.Add(field, (false, null));
+                if (!contains)
+                {
+                    attributeInFields.Add(field, (false, null));
+                }
             }
 
             return attributeInFields[field];
