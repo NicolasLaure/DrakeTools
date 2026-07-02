@@ -42,6 +42,14 @@ namespace DrakeToolbox.Services
             return services[typeof(ServiceType)] as ServiceType;
         }
 
+        public IService GetService(Type serviceType)
+        {
+            if (!services.ContainsKey(serviceType))
+                throw new KeyNotFoundException();
+
+            return services[serviceType];
+        }
+
         public bool ContainsService<ServiceType>() where ServiceType : class, IService
         {
             return services.ContainsKey(typeof(ServiceType));
