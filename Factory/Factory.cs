@@ -16,6 +16,7 @@ namespace DrakeToolbox.Factory
 
         protected uint lastAssignedId;
         protected Dictionary<Type, ConstructorInfo> constructors;
+        protected Dictionary<Type, MethodInfo> typeToSetIdMethod;
         protected Dictionary<string, Type> instanceClassNameToType;
 
         protected MethodInfo registerMethod;
@@ -36,24 +37,28 @@ namespace DrakeToolbox.Factory
             constructors = new Dictionary<Type, ConstructorInfo>();
             creationSubscriptions = new Dictionary<Type, object>();
             instanceClassNameToType = new Dictionary<string, Type>();
+            typeToSetIdMethod = new Dictionary<Type, MethodInfo>();
         }
 
-        public abstract uint CreateInstance(Type instanceType, params object[] parameters);
+        public abstract uint CreateInstance(Type instanceType, string blueprintId, params object[] parameters);
 
         protected void RegisterInstanceMethods(params Type[] constructorParameters)
         {
-            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
+            foreach (Type type in Assembly.GetCallingAssembly().GetTypes())
             {
                 if (type.IsClass && !type.IsAbstract)
                 {
-                    if (instanceType.IsAssignableFrom(type))
-                    {
-                        RegisterInstance(type, constructorParameters);
-                        subscribeToCreationMethod.MakeGenericMethod(type).Invoke(this, new object[0]);
-                        instanceClassNameToType.Add(type.Name, type);
-                    }
+                    if (typeof(Instance).IsAssignableFrom(type))
+                        if (instanceType.IsAssignableFrom(type))
+                        {
+                            RegisterInstance(type, constructorParameters);
+                            subscribeToCreationMethod?.MakeGenericMethod(type).Invoke(this, new object[0]);
+                            instanceClassNameToType.Add(type.Name, type);
+                            typeToSetIdMethod.Add(type, typeof(Instance).GetMethod(Instance.SetIdMethodName, BindingFlags.NonPublic | BindingFlags.Instance));
+                        }
                 }
             }
+
             void RegisterInstance(Type type, Type[] instanceConstructorParameters)
             {
                 foreach (ConstructorInfo constructor in type.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance))
@@ -80,7 +85,7 @@ namespace DrakeToolbox.Factory
 
         protected bool IsCreationValid(Type requestedType, params object[] parameters)
         {
-            if (!requestedType.IsAssignableFrom(instanceType) || !constructors.TryGetValue(requestedType, out ConstructorInfo constructor))
+            if (!instanceType.IsAssignableFrom(requestedType) || !constructors.TryGetValue(requestedType, out ConstructorInfo constructor))
             {
                 Logger.LogError($"Can't create instance of {requestedType.Name}");
                 return false;
