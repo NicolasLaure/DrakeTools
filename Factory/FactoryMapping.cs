@@ -10,8 +10,9 @@ namespace DrakeToolbox.Factory
         public bool IsPersistent => false;
 
         private Dictionary<Type, Type> instanceToFactoryType;
+        private Dictionary<string, Type> instanceTypeNameToInstanceType;
 
-        public Factory this[Type instanceType]
+        public Factory? this[Type instanceType]
         {
             get
             {
@@ -22,17 +23,32 @@ namespace DrakeToolbox.Factory
             }
         }
 
+        public Type? this[string instanceTypeName]
+        {
+            get
+            {
+                if (!instanceTypeNameToInstanceType.ContainsKey(instanceTypeName))
+                    return null;
+
+                return instanceTypeNameToInstanceType[instanceTypeName];
+            }
+        }
+
         public FactoryMapping()
         {
             instanceToFactoryType = new Dictionary<Type, Type>();
+            instanceTypeNameToInstanceType = new Dictionary<string, Type>();
 
-            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
+            foreach (Type type in Assembly.GetCallingAssembly().GetTypes())
             {
                 List<FactoryOf> attributes = new List<FactoryOf>(type.GetCustomAttributes<FactoryOf>());
                 if (attributes.Count > 0)
                 {
-                    Type instanceType = attributes[0].instanceType;
-                    instanceToFactoryType.Add(instanceType, type);
+                    foreach (Type instanceType in attributes[0].instanceTypes)
+                    {
+                        instanceToFactoryType.Add(instanceType, type);
+                        instanceTypeNameToInstanceType.Add(instanceType.Name, instanceType);
+                    }
                 }
             }
         }

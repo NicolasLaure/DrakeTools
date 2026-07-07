@@ -1,16 +1,19 @@
 namespace DrakeToolbox.Factory
 {
-    public class Instance
+    public abstract class Instance
     {
         protected uint id;
+        protected uint ownerId;
 
         public uint Id => id;
+        public uint OwnerId => ownerId;
 
-        internal const string SetIdMethodName = nameof(SetId);
+        internal const string SetIdsMethodName = nameof(SetIds);
 
-        private void SetId(uint id)
+        private void SetIds(uint id, uint ownerId)
         {
             this.id = id;
+            this.ownerId = ownerId;
         }
     }
 }

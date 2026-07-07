@@ -4,11 +4,11 @@ namespace DrakeToolbox.Factory
 {
     public sealed class FactoryOf : Attribute
     {
-        public Type instanceType;
+        public Type[] instanceTypes;
 
-        public FactoryOf(Type instanceType)
+        public FactoryOf(params Type[] instanceTypes)
         {
-            this.instanceType = instanceType;
+            this.instanceTypes = instanceTypes;
         }
     }
 }

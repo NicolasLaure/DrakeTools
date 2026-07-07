@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using DrakeToolbox.Blueprints;
 using DrakeToolbox.Console;
 using DrakeToolbox.Events;
+using DrakeToolbox.Formatting;
 using DrakeToolbox.Services;
 
 namespace DrakeToolbox.Factory
@@ -40,7 +42,26 @@ namespace DrakeToolbox.Factory
             typeToSetIdMethod = new Dictionary<Type, MethodInfo>();
         }
 
-        public abstract uint CreateInstance(Type instanceType, string blueprintId, params object[] parameters);
+        public uint CreateInstance(Type requestedType, string blueprintId, params byte[] parameters)
+        {
+            if (!constructors.ContainsKey(requestedType))
+                throw new KeyNotFoundException($"Cannot create instance of {requestedType.Name}");
+
+            ParameterInfo[] parameterInfos = constructors[requestedType].GetParameters();
+            object[] convertedParameters = new object[parameterInfos.Length];
+            int offset = 0;
+            for (int i = 0; i < parameterInfos.Length; i++)
+            {
+                int byteCount = Marshal.SizeOf(parameterInfos[i].ParameterType);
+
+                convertedParameters[i] = ByteFormat.ToObject(parameters, offset, parameterInfos[i].ParameterType);
+                offset += byteCount;
+            }
+
+            return CreateInstance(requestedType, blueprintId, convertedParameters);
+        }
+
+        protected abstract uint CreateInstance(Type requestedType, string blueprintId, params object[] parameters);
 
         protected void RegisterInstanceMethods(params Type[] constructorParameters)
         {
@@ -54,7 +75,7 @@ namespace DrakeToolbox.Factory
                             RegisterInstance(type, constructorParameters);
                             subscribeToCreationMethod?.MakeGenericMethod(type).Invoke(this, new object[0]);
                             instanceClassNameToType.Add(type.Name, type);
-                            typeToSetIdMethod.Add(type, typeof(Instance).GetMethod(Instance.SetIdMethodName, BindingFlags.NonPublic | BindingFlags.Instance));
+                            typeToSetIdMethod.Add(type, typeof(Instance).GetMethod(Instance.SetIdsMethodName, BindingFlags.NonPublic | BindingFlags.Instance));
                         }
                 }
             }
