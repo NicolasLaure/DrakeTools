@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -89,6 +91,20 @@ namespace DrakeToolbox.Formatting
             }
 
             return GetPrimitive(bytes, offset, type);
+        }
+
+        public static object[] ToObjectArray(byte[] bytes, int offset, Type[] types)
+        {
+            object[] convertedParameters = new object[types.Length];
+            for (int i = 0; i < types.Length; i++)
+            {
+                int byteCount = Marshal.SizeOf(types[i]);
+
+                convertedParameters[i] = ByteFormat.ToObject(bytes, offset, types[i]);
+                offset += byteCount;
+            }
+
+            return convertedParameters;
         }
 
         private static object GetPrimitive(byte[] bytes, int offset, Type type)

@@ -2,8 +2,8 @@ namespace DrakeToolbox.Factory
 {
     public abstract class Instance
     {
-        protected uint id;
-        protected uint ownerId;
+        protected uint id = 0u;
+        protected uint ownerId = 0u;
 
         public uint Id => id;
         public uint OwnerId => ownerId;

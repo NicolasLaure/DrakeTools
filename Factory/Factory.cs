@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using DrakeToolbox.Blueprints;
 using DrakeToolbox.Console;
 using DrakeToolbox.Events;
+using DrakeToolbox.Factory.Events;
 using DrakeToolbox.Formatting;
 using DrakeToolbox.Services;
 
@@ -21,13 +22,13 @@ namespace DrakeToolbox.Factory
         protected Dictionary<Type, MethodInfo> typeToSetIdMethod;
         protected Dictionary<string, Type> instanceClassNameToType;
 
-        protected MethodInfo registerMethod;
+        protected MethodInfo? registerMethod;
         protected MethodInfo raiseCreatedMethod;
 
         protected Dictionary<Type, object> creationSubscriptions;
-        protected MethodInfo subscribeToCreationMethod;
-        protected MethodInfo unsubscribeMethod;
-        protected MethodInfo raiseEntityRequestAcceptedMethod;
+        protected MethodInfo? subscribeToCreationMethod;
+        protected MethodInfo? unsubscribeMethod;
+        protected MethodInfo? raiseEntityRequestAcceptedMethod;
 
         private Type instanceType;
 
@@ -40,28 +41,24 @@ namespace DrakeToolbox.Factory
             creationSubscriptions = new Dictionary<Type, object>();
             instanceClassNameToType = new Dictionary<string, Type>();
             typeToSetIdMethod = new Dictionary<Type, MethodInfo>();
+
+            raiseCreatedMethod = typeof(Factory).GetMethod(nameof(RaiseInstanceCreated), BindingFlags.NonPublic | BindingFlags.Instance);
         }
 
-        public uint CreateInstance(Type requestedType, string blueprintId, params byte[] parameters)
+        public uint CreateInstance(Type requestedType, string blueprintId, uint ownerId, params byte[] parameters)
         {
             if (!constructors.ContainsKey(requestedType))
                 throw new KeyNotFoundException($"Cannot create instance of {requestedType.Name}");
 
             ParameterInfo[] parameterInfos = constructors[requestedType].GetParameters();
-            object[] convertedParameters = new object[parameterInfos.Length];
-            int offset = 0;
+            Type[] parameterTypes = new Type[parameterInfos.Length];
             for (int i = 0; i < parameterInfos.Length; i++)
-            {
-                int byteCount = Marshal.SizeOf(parameterInfos[i].ParameterType);
+                parameterTypes[i] = parameterInfos[i].ParameterType;
 
-                convertedParameters[i] = ByteFormat.ToObject(parameters, offset, parameterInfos[i].ParameterType);
-                offset += byteCount;
-            }
-
-            return CreateInstance(requestedType, blueprintId, convertedParameters);
+            return CreateInstance(requestedType, blueprintId, ownerId, ByteFormat.ToObjectArray(parameters, 0, parameterTypes));
         }
 
-        protected abstract uint CreateInstance(Type requestedType, string blueprintId, params object[] parameters);
+        protected abstract uint CreateInstance(Type requestedType, string blueprintId, uint ownerId, params object[] parameters);
 
         protected void RegisterInstanceMethods(params Type[] constructorParameters)
         {
@@ -129,6 +126,11 @@ namespace DrakeToolbox.Factory
             }
 
             return true;
+        }
+
+        private void RaiseInstanceCreated<InstanceType>(string blueprintId, uint instanceId, uint ownerId, object[] parameters) where InstanceType : Instance
+        {
+            EventBus.Raise<InstanceCreatedEvent<InstanceType>>(blueprintId, instanceId, ownerId, parameters);
         }
     }
 }
