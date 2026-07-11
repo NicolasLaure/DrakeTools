@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using DrakeToolbox.Console;
 using DrakeToolbox.Events;
 using DrakeToolbox.Services;
@@ -55,7 +56,8 @@ namespace DrakeToolbox.Factory
 
         private void HandleResetFactoryRequest(in ResetFactoryEvent callbackContext)
         {
-            foreach (Type type in FactoryMapping.FactoryTypes)
+            List<Type> instanceTypes = FactoryMapping.FactoryInstanceTypes;
+            foreach (Type type in instanceTypes)
             {
                 FactoryMapping[type].Reset();
             }

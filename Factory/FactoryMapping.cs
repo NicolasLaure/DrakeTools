@@ -14,7 +14,7 @@ namespace DrakeToolbox.Factory
 
         private Dictionary<Type, (MethodInfo instantiateMethod, MethodInfo deinstantiateMethod, MethodInfo clearMethod)> fabricTypeToMethods;
 
-        internal List<Type> FactoryTypes => new List<Type>(instanceToFactoryType.Values);
+        internal List<Type> FactoryInstanceTypes => new List<Type>(instanceToFactoryType.Keys);
 
         internal Factory? this[Type instanceType]
         {

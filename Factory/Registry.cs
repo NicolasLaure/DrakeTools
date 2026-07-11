@@ -65,11 +65,13 @@ namespace DrakeToolbox.Factory
 
         private void ClearInstances()
         {
+            List<uint> instanceIds = new List<uint>(instances.Keys);
+            foreach (uint instanceId in instanceIds)
+            {
+                DisposeInstance(instanceId);
+            }
+
             instances.Clear();
-
-            foreach (List<uint> ids in instanceIdsPerType.Values)
-                ids.Clear();
-
             instanceIdsPerType.Clear();
         }
 
