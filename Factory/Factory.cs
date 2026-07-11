@@ -22,29 +22,30 @@ namespace DrakeToolbox.Factory
         protected Dictionary<string, Type> instanceClassNameToType;
 
         protected MethodInfo? registerMethod;
+        protected MethodInfo? disposeMethod;
+        protected MethodInfo? clearMethod;
         protected MethodInfo raiseCreatedMethod;
 
-        protected Dictionary<Type, object> creationSubscriptions;
-        protected MethodInfo? subscribeToCreationMethod;
-        protected MethodInfo? unsubscribeMethod;
-        protected MethodInfo? raiseEntityRequestAcceptedMethod;
+        protected uint defaultInstanceId;
+        protected string blueprintTable;
 
         private Type instanceType;
 
-        protected Factory(uint defaultLastAssignedId, Type instanceType)
+        protected Factory(Type instanceType, uint defaultLastAssignedId, string blueprintTable)
         {
-            lastAssignedId = defaultLastAssignedId;
+            defaultInstanceId = defaultLastAssignedId;
+            lastAssignedId = defaultInstanceId;
+            this.blueprintTable = blueprintTable;
             this.instanceType = instanceType;
 
             constructors = new Dictionary<Type, ConstructorInfo>();
-            creationSubscriptions = new Dictionary<Type, object>();
             instanceClassNameToType = new Dictionary<string, Type>();
             typeToSetIdMethod = new Dictionary<Type, MethodInfo>();
 
             raiseCreatedMethod = typeof(Factory).GetMethod(nameof(RaiseInstanceCreated), BindingFlags.NonPublic | BindingFlags.Instance);
         }
 
-        public uint CreateInstance(Type requestedType, string blueprintId, uint ownerId, params byte[] parameters)
+        internal uint CreateInstance(Type requestedType, string blueprintId, uint ownerId, params byte[] parameters)
         {
             if (!constructors.ContainsKey(requestedType))
                 throw new KeyNotFoundException($"Cannot create instance of {requestedType.Name}");
@@ -57,7 +58,9 @@ namespace DrakeToolbox.Factory
             return CreateInstance(requestedType, blueprintId, ownerId, ByteFormat.ToObjectArray(parameters, 0, parameterTypes));
         }
 
-        protected abstract uint CreateInstance(Type requestedType, string blueprintId, uint ownerId, params object[] parameters);
+        internal abstract uint CreateInstance(Type requestedType, string blueprintId, uint ownerId, params object[] parameters);
+        internal abstract void Deinstantiate(uint instanceId);
+        internal abstract void Reset();
 
         protected void RegisterInstanceMethods(params Type[] constructorParameters)
         {
@@ -69,7 +72,6 @@ namespace DrakeToolbox.Factory
                         if (instanceType.IsAssignableFrom(type))
                         {
                             RegisterInstance(type, constructorParameters);
-                            subscribeToCreationMethod?.MakeGenericMethod(type).Invoke(this, new object[0]);
                             instanceClassNameToType.Add(type.Name, type);
                             typeToSetIdMethod.Add(type, typeof(Instance).GetMethod(Instance.SetIdsMethodName, BindingFlags.NonPublic | BindingFlags.Instance));
                         }

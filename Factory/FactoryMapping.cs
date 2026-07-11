@@ -12,7 +12,11 @@ namespace DrakeToolbox.Factory
         private Dictionary<Type, Type> instanceToFactoryType;
         private Dictionary<string, Type> instanceTypeNameToInstanceType;
 
-        public Factory? this[Type instanceType]
+        private Dictionary<Type, (MethodInfo instantiateMethod, MethodInfo deinstantiateMethod, MethodInfo clearMethod)> fabricTypeToMethods;
+
+        internal List<Type> FactoryTypes => new List<Type>(instanceToFactoryType.Values);
+
+        internal Factory? this[Type instanceType]
         {
             get
             {
@@ -23,7 +27,8 @@ namespace DrakeToolbox.Factory
             }
         }
 
-        public Type? this[string instanceTypeName]
+
+        internal Type? this[string instanceTypeName]
         {
             get
             {

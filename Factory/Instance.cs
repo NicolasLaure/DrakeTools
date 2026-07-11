@@ -1,6 +1,8 @@
+using DrakeToolbox.Flow;
+
 namespace DrakeToolbox.Factory
 {
-    public abstract class Instance
+    public abstract class Instance : IInitable
     {
         protected uint id = 0u;
         protected uint ownerId = 0u;
@@ -15,5 +17,8 @@ namespace DrakeToolbox.Factory
             this.id = id;
             this.ownerId = ownerId;
         }
+
+        public abstract void Init();
+        public abstract void LateInit();
     }
 }

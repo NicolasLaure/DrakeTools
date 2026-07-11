@@ -123,6 +123,7 @@ namespace DrakeToolbox.Factory
                 instanceData.instanceTypeLength = BitConverter.ToInt32(data, offset);
                 offset += sizeof(int);
                 instanceData.instanceType = new string(Encoding.Unicode.GetChars(data, offset, instanceData.instanceTypeLength));
+                offset += instanceData.instanceTypeLength;
 
                 instanceDatas.Add(instanceData);
             }
