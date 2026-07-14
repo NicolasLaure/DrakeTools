@@ -9,7 +9,7 @@ namespace DrakeToolbox.Factory
     {
         private Registry<InstanceType> InstanceRegistry => ServiceProvider.Instance.GetService<Registry<InstanceType>>();
 
-        public GenericFactory(uint defaultLastAssignedId, string blueprintTableName) : base(typeof(InstanceType), defaultLastAssignedId, blueprintTableName)
+        public GenericFactory(string blueprintTableName) : base(typeof(InstanceType), blueprintTableName)
         {
             registerMethod = InstanceRegistry.GetType().GetMethod(InstanceRegistry.RegisterMethodName,
                 BindingFlags.NonPublic | BindingFlags.Instance);
@@ -19,25 +19,22 @@ namespace DrakeToolbox.Factory
                 BindingFlags.NonPublic | BindingFlags.Instance);
         }
 
-        internal override uint CreateInstance(Type requestedType, string blueprintId, uint ownerId, params object[] parameters)
+        internal override uint CreateInstance(uint newEntityId, Type requestedType, string blueprintId, uint ownerId, params object[] parameters)
         {
             if (!IsCreationValid(requestedType, parameters))
                 return 0;
 
-            lastAssignedId++;
-            uint newEntityId = lastAssignedId;
 
             object newEntity = constructors[requestedType].Invoke(parameters);
             typeToSetIdMethod[requestedType].Invoke(newEntity, new object[] { newEntityId, ownerId });
 
-            ((InstanceType)newEntity).Init();
-
             if (registerMethod == null)
                 throw new MissingMethodException($"Missing EntityRegistry register method");
+            registerMethod.Invoke(InstanceRegistry, new object[] { newEntity });
 
             BlueprintBinder.Apply(ref newEntity, blueprintTable, blueprintId);
 
-            registerMethod.Invoke(InstanceRegistry, new object[] { newEntity });
+            ((InstanceType)newEntity).Init();
 
             List<Type> entityTypes = new List<Type>();
             Type currentType = null;
@@ -64,7 +61,6 @@ namespace DrakeToolbox.Factory
 
         internal override void Reset()
         {
-            lastAssignedId = defaultInstanceId;
             clearMethod.Invoke(InstanceRegistry, new object[] { });
         }
     }

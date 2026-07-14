@@ -12,11 +12,15 @@ namespace DrakeToolbox.Factory
         private FactoryMapping FactoryMapping => ServiceProvider.Instance.GetService<FactoryMapping>();
         private Logger Logger => ServiceProvider.Instance.GetService<Logger>();
 
+        private uint lastInstanceId;
+        private const uint DEFAULT_INSTANCE_ID = 0;
+
         public FactoryController()
         {
             EventBus.AddListener<LocalInstantiateRequest>(HandleLocalInstantiateRequest);
             EventBus.AddListener<LocalDeInstantiateRequest>(HandleLocalDeInstantiateRequest);
             EventBus.AddListener<ResetFactoryEvent>(HandleResetFactoryRequest);
+            lastInstanceId = DEFAULT_INSTANCE_ID;
         }
 
         public void Dispose()
@@ -36,7 +40,8 @@ namespace DrakeToolbox.Factory
                 return;
             }
 
-            FactoryMapping[instanceType].CreateInstance(instanceType, callbackContext.instanceData.blueprintId, callbackContext.instanceData.originalClientID, callbackContext.instanceData.constructorParameters);
+            lastInstanceId++;
+            FactoryMapping[instanceType].CreateInstance(lastInstanceId, instanceType, callbackContext.instanceData.blueprintId, callbackContext.instanceData.originalClientID, callbackContext.instanceData.constructorParameters);
             EventBus.Raise<LocalInstantiateRequestAccepted>(callbackContext.instanceData.blueprintId);
         }
 
@@ -56,6 +61,7 @@ namespace DrakeToolbox.Factory
 
         private void HandleResetFactoryRequest(in ResetFactoryEvent callbackContext)
         {
+            lastInstanceId = DEFAULT_INSTANCE_ID;
             List<Type> instanceTypes = FactoryMapping.FactoryInstanceTypes;
             foreach (Type type in instanceTypes)
             {

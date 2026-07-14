@@ -36,15 +36,12 @@ namespace DrakeToolbox.Blueprints
                         continue;
                     }
 
-                    (bool hasAttribute, BlueprintParameterAttribute attribute) blueprintParameter =
-                        GetBlueprintParameterAttribute(field);
+                    (bool hasAttribute, BlueprintParameterAttribute attribute) blueprintParameter = GetBlueprintParameterAttribute(field);
 
                     if (blueprintParameter.hasAttribute)
                     {
-                        field.SetValue(instance, StringCast.Convert(
-                            BlueprintRegistry.BlueprintDatas[blueprintTable]
-                                [blueprintId, blueprintParameter.attribute.ParameterHeader],
-                            field.FieldType));
+                        field.SetValue(instance, StringCast.Convert(BlueprintRegistry.BlueprintDatas[blueprintTable]
+                                [blueprintId, blueprintParameter.attribute.ParameterHeader], field.FieldType));
                     }
                 }
 

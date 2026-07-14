@@ -34,6 +34,9 @@ namespace DrakeToolbox.Events
         public void RemoveListener<EventType>(EventCallback<EventType> callback) where EventType : struct, IEvent
         {
             Type eventType = typeof(EventType);
+            if (subscribers.TryGetValue(eventType, out List<Delegate> callbacks) && !callbacks.Contains(callback))
+                return;
+
             if (!subscribersToDelete.ContainsKey(eventType))
                 subscribersToDelete.Add(eventType, new List<Delegate>());
 

@@ -16,7 +16,6 @@ namespace DrakeToolbox.Factory
         protected BlueprintBinder BlueprintBinder => ServiceProvider.Instance.GetService<BlueprintBinder>();
         private Logger Logger => ServiceProvider.Instance.GetService<Logger>();
 
-        protected uint lastAssignedId;
         protected Dictionary<Type, ConstructorInfo> constructors;
         protected Dictionary<Type, MethodInfo> typeToSetIdMethod;
         protected Dictionary<string, Type> instanceClassNameToType;
@@ -26,15 +25,12 @@ namespace DrakeToolbox.Factory
         protected MethodInfo? clearMethod;
         protected MethodInfo raiseCreatedMethod;
 
-        protected uint defaultInstanceId;
         protected string blueprintTable;
 
         private Type instanceType;
 
-        protected Factory(Type instanceType, uint defaultLastAssignedId, string blueprintTable)
+        protected Factory(Type instanceType, string blueprintTable)
         {
-            defaultInstanceId = defaultLastAssignedId;
-            lastAssignedId = defaultInstanceId;
             this.blueprintTable = blueprintTable;
             this.instanceType = instanceType;
 
@@ -45,7 +41,7 @@ namespace DrakeToolbox.Factory
             raiseCreatedMethod = typeof(Factory).GetMethod(nameof(RaiseInstanceCreated), BindingFlags.NonPublic | BindingFlags.Instance);
         }
 
-        internal uint CreateInstance(Type requestedType, string blueprintId, uint ownerId, params byte[] parameters)
+        internal uint CreateInstance(uint newEntityId, Type requestedType, string blueprintId, uint ownerId, params byte[] parameters)
         {
             if (!constructors.ContainsKey(requestedType))
                 throw new KeyNotFoundException($"Cannot create instance of {requestedType.Name}");
@@ -55,10 +51,10 @@ namespace DrakeToolbox.Factory
             for (int i = 0; i < parameterInfos.Length; i++)
                 parameterTypes[i] = parameterInfos[i].ParameterType;
 
-            return CreateInstance(requestedType, blueprintId, ownerId, ByteFormat.ToObjectArray(parameters, 0, parameterTypes));
+            return CreateInstance(newEntityId, requestedType, blueprintId, ownerId, ByteFormat.ToObjectArray(parameters, 0, parameterTypes));
         }
 
-        internal abstract uint CreateInstance(Type requestedType, string blueprintId, uint ownerId, params object[] parameters);
+        internal abstract uint CreateInstance(uint newEntityId, Type requestedType, string blueprintId, uint ownerId, params object[] parameters);
         internal abstract void Deinstantiate(uint instanceId);
         internal abstract void Reset();
 

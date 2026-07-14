@@ -32,14 +32,14 @@ namespace DrakeToolbox.Factory
         private void Register(InstanceType entity)
         {
             instances.Add(entity.Id, entity);
-            Type currentEntityType = entity.GetType();
+            Type? currentEntityType = null;
             do
             {
-                if (!instanceIdsPerType.ContainsKey(currentEntityType))
+                currentEntityType = currentEntityType == null ? entity.GetType() : currentEntityType.BaseType;
+                if (currentEntityType != null && !instanceIdsPerType.ContainsKey(currentEntityType))
                     instanceIdsPerType.Add(currentEntityType, new List<uint>());
 
                 instanceIdsPerType[currentEntityType].Add(entity.Id);
-                currentEntityType = currentEntityType.BaseType;
             } while (currentEntityType != typeof(InstanceType));
         }
 
