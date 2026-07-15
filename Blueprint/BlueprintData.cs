@@ -5,7 +5,21 @@ namespace DrakeToolbox.Blueprints
 {
     internal sealed class BlueprintData
     {
-        internal string this[string blueprintID, string parameter] => rawContent[blueprintIds.IndexOf(blueprintID) + 1, parameters.IndexOf(parameter) + 1];
+        internal string this[string blueprintID, string parameter]
+        {
+            get
+            {
+                if (blueprintIds.Contains(blueprintID))
+                {
+                    if (parameters.Contains(parameter))
+                        return rawContent[blueprintIds.IndexOf(blueprintID) + 1, parameters.IndexOf(parameter) + 1];
+
+                    return "Parameter Not present in table";
+                }
+
+                return "BlueprintId Not present in table";
+            }
+        }
 
         private readonly string[,] rawContent;
         private readonly List<string> blueprintIds;
