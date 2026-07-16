@@ -72,7 +72,7 @@ namespace DrakeToolbox.Factory
             InstanceData instanceData = new InstanceData();
 
             int offset = 0;
-            instanceData.instanceID = BitConverter.ToUInt32(data);
+            instanceData.instanceID = BitConverter.ToUInt32(data, offset);
             offset += sizeof(uint);
             instanceData.originalClientID = BitConverter.ToUInt32(data, offset);
             offset += sizeof(uint);
@@ -104,17 +104,17 @@ namespace DrakeToolbox.Factory
             return instanceData;
         }
 
-        public static List<InstanceData> DeserealizeMultiple(byte[] data, int count)
+        public static List<InstanceData> DeserializeMultiple(byte[] data, int count)
         {
             List<InstanceData> instanceDatas = new List<InstanceData>();
             int offset = 0;
             for (int i = 0; i < count; i++)
             {
                 InstanceData instanceData;
-                instanceData.instanceID = BitConverter.ToUInt32(data);
-                offset += sizeof(int);
+                instanceData.instanceID = BitConverter.ToUInt32(data, offset);
+                offset += sizeof(uint);
                 instanceData.originalClientID = BitConverter.ToUInt32(data, offset);
-                offset += sizeof(int);
+                offset += sizeof(uint);
                 instanceData.blueprintIdLength = BitConverter.ToInt32(data, offset);
                 offset += sizeof(int);
                 instanceData.blueprintId = Encoding.Unicode.GetString(data, offset, instanceData.blueprintIdLength);
@@ -138,7 +138,7 @@ namespace DrakeToolbox.Factory
 
                 instanceData.instanceTypeLength = BitConverter.ToInt32(data, offset);
                 offset += sizeof(int);
-                instanceData.instanceType = new string(Encoding.Unicode.GetChars(data, offset, instanceData.instanceTypeLength));
+                instanceData.instanceType = Encoding.Unicode.GetString(data, offset, instanceData.instanceTypeLength);
                 offset += instanceData.instanceTypeLength;
 
                 instanceDatas.Add(instanceData);

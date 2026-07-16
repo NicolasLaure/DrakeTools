@@ -52,14 +52,15 @@ namespace DrakeToolbox.Factory
             InstanceType instance = instances[id];
             instances.Remove(id);
 
-            Type currentEntityType = instance.GetType();
+            Type? currentEntityType = null;
             do
             {
-                if (!instanceIdsPerType.ContainsKey(currentEntityType))
-                    instanceIdsPerType.Add(currentEntityType, new List<uint>());
-                instanceIdsPerType[currentEntityType].Remove(id);
+                currentEntityType = currentEntityType == null ? instance.GetType() : currentEntityType.BaseType;
 
-                currentEntityType = currentEntityType.BaseType;
+                if (currentEntityType != null && !instanceIdsPerType.ContainsKey(currentEntityType))
+                    instanceIdsPerType.Add(currentEntityType, new List<uint>());
+
+                instanceIdsPerType[currentEntityType].Remove(id);
             } while (currentEntityType != typeof(InstanceType));
         }
 
