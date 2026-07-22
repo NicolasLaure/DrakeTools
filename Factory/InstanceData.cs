@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using DrakeToolbox.Console;
-using DrakeToolbox.Services;
 
 namespace DrakeToolbox.Factory
 {
@@ -14,7 +12,6 @@ namespace DrakeToolbox.Factory
         public string blueprintId;
         public int parametersByteCount;
         public byte[] constructorParameters;
-        public int routeLength;
         public int[] route;
         public int instanceTypeLength;
         public string instanceType;
@@ -23,7 +20,7 @@ namespace DrakeToolbox.Factory
         {
             if (left.instanceID != right.instanceID || left.originalClientID != right.originalClientID ||
                 left.blueprintIdLength != right.blueprintIdLength || left.blueprintId != right.blueprintId ||
-                left.parametersByteCount != right.parametersByteCount || left.routeLength != right.routeLength ||
+                left.parametersByteCount != right.parametersByteCount || left.route.Length != right.route.Length ||
                 left.instanceTypeLength != right.instanceTypeLength || left.instanceType != right.instanceType)
                 return false;
 
@@ -33,7 +30,7 @@ namespace DrakeToolbox.Factory
                     return false;
             }
 
-            for (int i = 0; i < left.routeLength; i++)
+            for (int i = 0; i < left.route.Length; i++)
             {
                 if (left.route[i] != right.route[i])
                     return false;
@@ -58,8 +55,8 @@ namespace DrakeToolbox.Factory
             data.AddRange(BitConverter.GetBytes(constructorParameters.Length));
             data.AddRange(constructorParameters);
 
-            data.AddRange(BitConverter.GetBytes(routeLength));
-            for (int i = 0; i < routeLength; i++)
+            data.AddRange(BitConverter.GetBytes(route.Length));
+            for (int i = 0; i < route.Length; i++)
                 data.AddRange(BitConverter.GetBytes(route[i]));
 
             data.AddRange(BitConverter.GetBytes(Encoding.Unicode.GetByteCount(instanceType)));
@@ -86,10 +83,10 @@ namespace DrakeToolbox.Factory
             instanceData.constructorParameters = data[offset..(offset + instanceData.parametersByteCount)];
             offset += instanceData.parametersByteCount;
 
-            instanceData.routeLength = BitConverter.ToInt32(data, offset);
+            int routeLength = BitConverter.ToInt32(data, offset);
             offset += sizeof(int);
             List<int> routeList = new List<int>();
-            for (int i = 0; i < instanceData.routeLength; i++)
+            for (int i = 0; i < routeLength; i++)
             {
                 routeList.Add(BitConverter.ToInt32(data, offset));
                 offset += sizeof(int);
@@ -125,10 +122,10 @@ namespace DrakeToolbox.Factory
                 instanceData.constructorParameters = data[offset..(offset + instanceData.parametersByteCount)];
                 offset += instanceData.parametersByteCount;
 
-                instanceData.routeLength = BitConverter.ToInt32(data, offset);
+                int routeLength = BitConverter.ToInt32(data, offset);
                 offset += sizeof(int);
                 List<int> routeList = new List<int>();
-                for (int j = 0; j < instanceData.routeLength; j++)
+                for (int j = 0; j < routeLength; j++)
                 {
                     routeList.Add(BitConverter.ToInt32(data, offset));
                     offset += sizeof(int);

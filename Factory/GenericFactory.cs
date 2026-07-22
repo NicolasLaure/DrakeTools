@@ -19,14 +19,14 @@ namespace DrakeToolbox.Factory
                 BindingFlags.NonPublic | BindingFlags.Instance);
         }
 
-        internal override uint CreateInstance(uint newEntityId, Type requestedType, string blueprintId, uint ownerId, params object[] parameters)
+        internal override uint CreateInstance(uint newEntityId, Type requestedType, string blueprintId, uint ownerId, uint clientId, params object[] parameters)
         {
             if (!IsCreationValid(requestedType, parameters))
                 return 0;
 
 
             object newEntity = constructors[requestedType].Invoke(parameters);
-            typeToSetIdMethod[requestedType].Invoke(newEntity, new object[] { newEntityId, ownerId });
+            typeToSetIdMethod[requestedType].Invoke(newEntity, new object[] { newEntityId, ownerId, clientId });
 
             if (registerMethod == null)
                 throw new MissingMethodException($"Missing EntityRegistry register method");
@@ -51,6 +51,7 @@ namespace DrakeToolbox.Factory
             }
 
             ((InstanceType)newEntity).LateInit();
+
             return newEntityId;
         }
 
@@ -62,6 +63,21 @@ namespace DrakeToolbox.Factory
         internal override void Reset()
         {
             clearMethod.Invoke(InstanceRegistry, new object[] { });
+        }
+
+        public override object GetInstance(uint id)
+        {
+            return InstanceRegistry[id];
+        }
+
+        public override int GetInstancesCount()
+        {
+            return InstanceRegistry.GetCount();
+        }
+
+        public override bool ContainsInstance(uint id)
+        {
+            return InstanceRegistry.Contains(id);
         }
     }
 }

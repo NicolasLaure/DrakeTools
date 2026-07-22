@@ -28,5 +28,13 @@ namespace DrakeToolbox.Reflection
 
             return convertedParameters;
         }
+
+        public static object GetField(Type type, object instance, string fieldName, BindingFlags flags)
+        {
+            FieldInfo field = type.GetField(fieldName, flags);
+            if (field == null)
+                throw new MissingFieldException($"Type:{nameof(type)} does not contain a field: {fieldName}");
+            return field.GetValue(instance);
+        }
     }
 }

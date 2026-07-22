@@ -41,7 +41,7 @@ namespace DrakeToolbox.Factory
             raiseCreatedMethod = typeof(Factory).GetMethod(nameof(RaiseInstanceCreated), BindingFlags.NonPublic | BindingFlags.Instance);
         }
 
-        internal uint CreateInstance(uint newEntityId, Type requestedType, string blueprintId, uint ownerId, params byte[] parameters)
+        internal uint CreateInstance(uint newEntityId, Type requestedType, string blueprintId, uint ownerId, uint clientId, params byte[] parameters)
         {
             if (!constructors.ContainsKey(requestedType))
                 throw new KeyNotFoundException($"Cannot create instance of {requestedType.Name}");
@@ -51,10 +51,10 @@ namespace DrakeToolbox.Factory
             for (int i = 0; i < parameterInfos.Length; i++)
                 parameterTypes[i] = parameterInfos[i].ParameterType;
 
-            return CreateInstance(newEntityId, requestedType, blueprintId, ownerId, ByteFormat.ToObjectArray(parameters, 0, parameterTypes));
+            return CreateInstance(newEntityId, requestedType, blueprintId, ownerId, clientId, ByteFormat.ToObjectArray(parameters, 0, parameterTypes));
         }
 
-        internal abstract uint CreateInstance(uint newEntityId, Type requestedType, string blueprintId, uint ownerId, params object[] parameters);
+        internal abstract uint CreateInstance(uint newEntityId, Type requestedType, string blueprintId, uint ownerId, uint clientId, params object[] parameters);
         internal abstract void Deinstantiate(uint instanceId);
         internal abstract void Reset();
 
@@ -129,5 +129,9 @@ namespace DrakeToolbox.Factory
         {
             EventBus.Raise<InstanceCreatedEvent<InstanceType>>(blueprintId, instanceId, ownerId, parameters);
         }
+
+        public abstract object GetInstance(uint id);
+        public abstract int GetInstancesCount();
+        public abstract bool ContainsInstance(uint id);
     }
 }

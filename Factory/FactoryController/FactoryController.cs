@@ -12,15 +12,24 @@ namespace DrakeToolbox.Factory
         private FactoryMapping FactoryMapping => ServiceProvider.Instance.GetService<FactoryMapping>();
         private Logger Logger => ServiceProvider.Instance.GetService<Logger>();
 
-        private uint lastInstanceId;
-        private const uint DEFAULT_INSTANCE_ID = 0;
+        private uint nextInstanceId;
+        private uint defaultInstanceId;
 
-        public FactoryController()
+        public uint NextInstanceId => nextInstanceId;
+
+
+        private SortedDictionary<uint, InstanceData> heldInstances;
+
+
+        public FactoryController(uint defaultInstanceId)
         {
             EventBus.AddListener<LocalInstantiateRequest>(HandleLocalInstantiateRequest);
             EventBus.AddListener<LocalDeInstantiateRequest>(HandleLocalDeInstantiateRequest);
             EventBus.AddListener<ResetFactoryEvent>(HandleResetFactoryRequest);
-            lastInstanceId = DEFAULT_INSTANCE_ID;
+            this.defaultInstanceId = defaultInstanceId;
+            nextInstanceId = defaultInstanceId;
+
+            heldInstances = new SortedDictionary<uint, InstanceData>();
         }
 
         public void Dispose()
@@ -28,6 +37,34 @@ namespace DrakeToolbox.Factory
             EventBus.RemoveListener<LocalInstantiateRequest>(HandleLocalInstantiateRequest);
             EventBus.RemoveListener<LocalDeInstantiateRequest>(HandleLocalDeInstantiateRequest);
             EventBus.RemoveListener<ResetFactoryEvent>(HandleResetFactoryRequest);
+        }
+
+        public void Sync(uint instanceId)
+        {
+            nextInstanceId = instanceId;
+        }
+
+        public object GetInstance(string type, uint instanceId)
+        {
+            Type instanceType = FactoryMapping[type];
+            if (instanceType == null)
+            {
+                Logger.Log($"No Factory available for {type}");
+                return null;
+            }
+
+            return FactoryMapping[instanceType].GetInstance(instanceId);
+        }
+
+        public bool TryGetInstanceCount(string type, out int instanceCount)
+        {
+            Type instanceType = FactoryMapping[type];
+            instanceCount = 0;
+            if (instanceType == null)
+                return false;
+
+            instanceCount = FactoryMapping[instanceType].GetInstancesCount();
+            return true;
         }
 
         private void HandleLocalInstantiateRequest(in LocalInstantiateRequest callbackContext)
@@ -40,9 +77,30 @@ namespace DrakeToolbox.Factory
                 return;
             }
 
-            lastInstanceId++;
-            FactoryMapping[instanceType].CreateInstance(lastInstanceId, instanceType, callbackContext.instanceData.blueprintId, callbackContext.instanceData.originalClientID, callbackContext.instanceData.constructorParameters);
-            EventBus.Raise<LocalInstantiateRequestAccepted>(callbackContext.instanceData.blueprintId);
+            if (FactoryMapping[instanceType].ContainsInstance(nextInstanceId))
+            {
+                Logger.Log($"InstanceId {nextInstanceId} was already present");
+                EventBus.Raise<LocalInstantiateRequestRejected>($"InstanceId {nextInstanceId} was already present");
+                return;
+            }
+
+            if (callbackContext.instanceData.instanceID > nextInstanceId)
+            {
+                heldInstances.Add(callbackContext.instanceData.instanceID, callbackContext.instanceData);
+                return;
+            }
+
+            FactoryMapping[instanceType].CreateInstance(nextInstanceId, instanceType, callbackContext.instanceData.blueprintId, callbackContext.instanceData.originalClientID, callbackContext.clientId, callbackContext.instanceData.constructorParameters);
+            EventBus.Raise<LocalInstantiateRequestAccepted>(nextInstanceId, callbackContext.instanceData.instanceType);
+            nextInstanceId++;
+
+            foreach (uint instanceId in heldInstances.Keys)
+            {
+                if (instanceId > nextInstanceId) return;
+
+                FactoryMapping[instanceType].CreateInstance(nextInstanceId, instanceType, callbackContext.instanceData.blueprintId, callbackContext.instanceData.originalClientID, callbackContext.clientId, callbackContext.instanceData.constructorParameters);
+                EventBus.Raise<LocalInstantiateRequestAccepted>(nextInstanceId, callbackContext.instanceData.instanceType);
+            }
         }
 
         private void HandleLocalDeInstantiateRequest(in LocalDeInstantiateRequest callbackContext)
@@ -61,12 +119,16 @@ namespace DrakeToolbox.Factory
 
         private void HandleResetFactoryRequest(in ResetFactoryEvent callbackContext)
         {
-            lastInstanceId = DEFAULT_INSTANCE_ID;
-            List<Type> instanceTypes = FactoryMapping.FactoryInstanceTypes;
-            foreach (Type type in instanceTypes)
+            nextInstanceId = defaultInstanceId;
+            Logger.Log("Reset Factories");
+
+            foreach (Type type in FactoryMapping.FactoryInstanceTypes)
             {
                 FactoryMapping[type].Reset();
             }
+
+            Logger.Log("Factories Resetted");
+            EventBus.Raise<FactoryResetSuccessEvent>();
         }
     }
 }

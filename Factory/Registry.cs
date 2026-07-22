@@ -20,6 +20,7 @@ namespace DrakeToolbox.Factory
         public string RegisterMethodName => nameof(Register);
         public string DisposeInstanceMethodName => nameof(DisposeInstance);
         public string ClearInstancesMethodName => nameof(ClearInstances);
+        public string InstancesFieldName => nameof(instances);
 
         private EventBus EventBus => ServiceProvider.Instance.GetService<EventBus>();
 
@@ -78,7 +79,20 @@ namespace DrakeToolbox.Factory
 
         public EntityType GetEntity<EntityType>(uint id) where EntityType : InstanceType
         {
-            return (EntityType)instances[id];
+            if (instances[id] as EntityType != null)
+                return (EntityType)instances[id];
+            else
+                return null;
+        }
+
+        public int GetCount()
+        {
+            return instances.Count;
+        }
+
+        public bool Contains(uint id)
+        {
+            return instances.ContainsKey(id);
         }
     }
 }
