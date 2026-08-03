@@ -71,6 +71,15 @@ namespace DrakeToolbox.Formatting
             return bytes.ToArray();
         }
 
+        public static byte[] ToByteArray(object[] objects)
+        {
+            List<byte> bytes = new List<byte>();
+            foreach (object obj in objects)
+                bytes.AddRange(ToByteArray(obj));
+
+            return bytes.ToArray();
+        }
+
         public static object ToObject<ObjectType>(byte[] bytes, int offset)
         {
             if (!typeof(ObjectType).IsPrimitive)

@@ -8,23 +8,20 @@ namespace DrakeToolbox.Factory
     {
         public uint instanceID;
         public uint originalClientID;
-        public int blueprintIdLength;
         public string blueprintId;
-        public int parametersByteCount;
         public byte[] constructorParameters;
         public int[] route;
-        public int instanceTypeLength;
         public string instanceType;
 
         public static bool operator ==(InstanceData left, InstanceData right)
         {
             if (left.instanceID != right.instanceID || left.originalClientID != right.originalClientID ||
-                left.blueprintIdLength != right.blueprintIdLength || left.blueprintId != right.blueprintId ||
-                left.parametersByteCount != right.parametersByteCount || left.route.Length != right.route.Length ||
-                left.instanceTypeLength != right.instanceTypeLength || left.instanceType != right.instanceType)
+                left.blueprintId.Length != right.blueprintId.Length || left.blueprintId != right.blueprintId ||
+                left.constructorParameters.Length != right.constructorParameters.Length || left.route.Length != right.route.Length ||
+                left.instanceType.Length != right.instanceType.Length || left.instanceType != right.instanceType)
                 return false;
 
-            for (int i = 0; i < left.parametersByteCount; i++)
+            for (int i = 0; i < left.constructorParameters.Length; i++)
             {
                 if (left.constructorParameters[i] != right.constructorParameters[i])
                     return false;
@@ -73,15 +70,15 @@ namespace DrakeToolbox.Factory
             offset += sizeof(uint);
             instanceData.originalClientID = BitConverter.ToUInt32(data, offset);
             offset += sizeof(uint);
-            instanceData.blueprintIdLength = BitConverter.ToInt32(data, offset);
+            int blueprintIdLength = BitConverter.ToInt32(data, offset);
             offset += sizeof(int);
-            instanceData.blueprintId = Encoding.Unicode.GetString(data, offset, instanceData.blueprintIdLength);
-            offset += instanceData.blueprintIdLength;
+            instanceData.blueprintId = Encoding.Unicode.GetString(data, offset, blueprintIdLength);
+            offset += blueprintIdLength;
 
-            instanceData.parametersByteCount = BitConverter.ToInt32(data, offset);
+            int parametersByteCount = BitConverter.ToInt32(data, offset);
             offset += sizeof(int);
-            instanceData.constructorParameters = data[offset..(offset + instanceData.parametersByteCount)];
-            offset += instanceData.parametersByteCount;
+            instanceData.constructorParameters = data[offset..(offset + parametersByteCount)];
+            offset += parametersByteCount;
 
             int routeLength = BitConverter.ToInt32(data, offset);
             offset += sizeof(int);
@@ -94,9 +91,9 @@ namespace DrakeToolbox.Factory
 
             instanceData.route = routeList.ToArray();
 
-            instanceData.instanceTypeLength = BitConverter.ToInt32(data, offset);
+            int instanceTypeLength = BitConverter.ToInt32(data, offset);
             offset += sizeof(int);
-            instanceData.instanceType = Encoding.Unicode.GetString(data, offset, instanceData.instanceTypeLength);
+            instanceData.instanceType = Encoding.Unicode.GetString(data, offset, instanceTypeLength);
 
             return instanceData;
         }
@@ -112,15 +109,15 @@ namespace DrakeToolbox.Factory
                 offset += sizeof(uint);
                 instanceData.originalClientID = BitConverter.ToUInt32(data, offset);
                 offset += sizeof(uint);
-                instanceData.blueprintIdLength = BitConverter.ToInt32(data, offset);
+                int blueprintIdLength = BitConverter.ToInt32(data, offset);
                 offset += sizeof(int);
-                instanceData.blueprintId = Encoding.Unicode.GetString(data, offset, instanceData.blueprintIdLength);
-                offset += instanceData.blueprintIdLength;
+                instanceData.blueprintId = Encoding.Unicode.GetString(data, offset, blueprintIdLength);
+                offset += blueprintIdLength;
 
-                instanceData.parametersByteCount = BitConverter.ToInt32(data, offset);
+                int parametersByteCount = BitConverter.ToInt32(data, offset);
                 offset += sizeof(int);
-                instanceData.constructorParameters = data[offset..(offset + instanceData.parametersByteCount)];
-                offset += instanceData.parametersByteCount;
+                instanceData.constructorParameters = data[offset..(offset + parametersByteCount)];
+                offset += parametersByteCount;
 
                 int routeLength = BitConverter.ToInt32(data, offset);
                 offset += sizeof(int);
@@ -133,10 +130,10 @@ namespace DrakeToolbox.Factory
 
                 instanceData.route = routeList.ToArray();
 
-                instanceData.instanceTypeLength = BitConverter.ToInt32(data, offset);
+                int instanceTypeLength = BitConverter.ToInt32(data, offset);
                 offset += sizeof(int);
-                instanceData.instanceType = Encoding.Unicode.GetString(data, offset, instanceData.instanceTypeLength);
-                offset += instanceData.instanceTypeLength;
+                instanceData.instanceType = Encoding.Unicode.GetString(data, offset, instanceTypeLength);
+                offset += instanceTypeLength;
 
                 instanceDatas.Add(instanceData);
             }

@@ -24,7 +24,7 @@ namespace DrakeToolbox.Tasks
 
         public void Tick(float deltaTime)
         {
-            for (int i = scheduledTasks.Count; i >= 0; i--)
+            for (int i = scheduledTasks.Count - 1; i >= 0; i--)
             {
                 ScheduleCall task = scheduledTasks[i];
                 task.remainingTime -= deltaTime;

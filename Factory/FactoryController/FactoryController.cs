@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
-using DrakeToolbox.Console;
 using DrakeToolbox.Events;
+using DrakeToolbox.Factory.Events;
+using DrakeToolbox.Logging;
 using DrakeToolbox.Services;
 
 namespace DrakeToolbox.Factory
@@ -17,9 +18,7 @@ namespace DrakeToolbox.Factory
 
         public uint NextInstanceId => nextInstanceId;
 
-
         private SortedDictionary<uint, InstanceData> heldInstances;
-
 
         public FactoryController(uint defaultInstanceId)
         {
@@ -69,11 +68,16 @@ namespace DrakeToolbox.Factory
 
         private void HandleLocalInstantiateRequest(in LocalInstantiateRequest callbackContext)
         {
-            Type instanceType = FactoryMapping[callbackContext.instanceData.instanceType];
+            TryInstantiate(callbackContext.instanceData, callbackContext.clientId);
+        }
+
+        private void TryInstantiate(InstanceData instanceData, uint clientId)
+        {
+            Type instanceType = FactoryMapping[instanceData.instanceType];
             if (instanceType == null)
             {
-                Logger.Log($"No Factory available for {callbackContext.instanceData.instanceType}");
-                EventBus.Raise<LocalInstantiateRequestRejected>($"No Factory available for {callbackContext.instanceData.instanceType}");
+                Logger.Log($"No Factory available for {instanceData.instanceType}");
+                EventBus.Raise<LocalInstantiateRequestRejected>($"No Factory available for {instanceData.instanceType}");
                 return;
             }
 
@@ -84,23 +88,32 @@ namespace DrakeToolbox.Factory
                 return;
             }
 
-            if (callbackContext.instanceData.instanceID > nextInstanceId)
+            if (instanceData.instanceID > nextInstanceId)
             {
-                heldInstances.Add(callbackContext.instanceData.instanceID, callbackContext.instanceData);
+                heldInstances.Add(instanceData.instanceID, instanceData);
                 return;
             }
 
-            FactoryMapping[instanceType].CreateInstance(nextInstanceId, instanceType, callbackContext.instanceData.blueprintId, callbackContext.instanceData.originalClientID, callbackContext.clientId, callbackContext.instanceData.constructorParameters);
-            EventBus.Raise<LocalInstantiateRequestAccepted>(nextInstanceId, callbackContext.instanceData.instanceType);
-            nextInstanceId++;
-
-            foreach (uint instanceId in heldInstances.Keys)
+            uint result = FactoryMapping[instanceType].CreateInstance(nextInstanceId, instanceType, instanceData.blueprintId, instanceData.originalClientID, clientId, instanceData.constructorParameters);
+            if (nextInstanceId != 0 && result == 0)
             {
-                if (instanceId > nextInstanceId) return;
-
-                FactoryMapping[instanceType].CreateInstance(nextInstanceId, instanceType, callbackContext.instanceData.blueprintId, callbackContext.instanceData.originalClientID, callbackContext.clientId, callbackContext.instanceData.constructorParameters);
-                EventBus.Raise<LocalInstantiateRequestAccepted>(nextInstanceId, callbackContext.instanceData.instanceType);
+                Logger.Log($"Instantiation Failed");
+                EventBus.Raise<LocalInstantiateRequestRejected>($"Instantiation Failed");
+                return;
             }
+
+            EventBus.Raise<LocalInstantiateRequestAccepted>(nextInstanceId, instanceData.instanceType);
+            nextInstanceId++;
+            EventBus.Raise<NonGenericInstanceCreatedEvent>(instanceData);
+        }
+
+        public object[] GetParameters(string typeName, byte[] parameterBytes)
+        {
+            Type instanceType = FactoryMapping[typeName];
+            if (instanceType == null)
+                return Array.Empty<object>();
+
+            return FactoryMapping[instanceType].GetParameters(instanceType, parameterBytes);
         }
 
         private void HandleLocalDeInstantiateRequest(in LocalDeInstantiateRequest callbackContext)

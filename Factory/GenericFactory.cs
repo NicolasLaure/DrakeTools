@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using DrakeToolbox.Logging;
 using DrakeToolbox.Services;
 
 namespace DrakeToolbox.Factory
@@ -23,7 +24,6 @@ namespace DrakeToolbox.Factory
         {
             if (!IsCreationValid(requestedType, parameters))
                 return 0;
-
 
             object newEntity = constructors[requestedType].Invoke(parameters);
             typeToSetIdMethod[requestedType].Invoke(newEntity, new object[] { newEntityId, ownerId, clientId });

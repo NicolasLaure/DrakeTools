@@ -1,7 +1,7 @@
 using DrakeToolbox.Events;
 using DrakeToolbox.Services;
 
-namespace DrakeToolbox.Console
+namespace DrakeToolbox.Logging
 {
     public class Logger : IService
     {

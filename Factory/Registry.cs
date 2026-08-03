@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using DrakeToolbox.Console;
 using DrakeToolbox.Events;
 using DrakeToolbox.Factory.Events;
 using DrakeToolbox.Services;

@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using DrakeToolbox.Blueprints;
-using DrakeToolbox.Console;
 using DrakeToolbox.Events;
 using DrakeToolbox.Factory.Events;
 using DrakeToolbox.Formatting;
+using DrakeToolbox.Logging;
 using DrakeToolbox.Services;
 
 namespace DrakeToolbox.Factory
@@ -41,6 +41,18 @@ namespace DrakeToolbox.Factory
             raiseCreatedMethod = typeof(Factory).GetMethod(nameof(RaiseInstanceCreated), BindingFlags.NonPublic | BindingFlags.Instance);
         }
 
+        internal object[] GetParameters(Type instanceType, byte[] parameterBytes)
+        {
+            if (!constructors.ContainsKey(instanceType))
+                throw new KeyNotFoundException($"Cannot Find Constructor of {instanceType.Name}");
+
+            ParameterInfo[] parameterInfos = constructors[instanceType].GetParameters();
+            Type[] parameterTypes = new Type[parameterInfos.Length];
+            for (int i = 0; i < parameterInfos.Length; i++)
+                parameterTypes[i] = parameterInfos[i].ParameterType;
+
+            return ByteFormat.ToObjectArray(parameterBytes, 0, parameterTypes);
+        }
         internal uint CreateInstance(uint newEntityId, Type requestedType, string blueprintId, uint ownerId, uint clientId, params byte[] parameters)
         {
             if (!constructors.ContainsKey(requestedType))

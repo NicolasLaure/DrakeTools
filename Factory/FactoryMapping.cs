@@ -27,7 +27,7 @@ namespace DrakeToolbox.Factory
             }
         }
 
-        internal Type? this[string instanceTypeName]
+        public Type? this[string instanceTypeName]
         {
             get
             {

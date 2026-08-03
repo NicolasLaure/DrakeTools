@@ -1,6 +1,6 @@
 using DrakeToolbox.Events;
 
-namespace DrakeToolbox.Console
+namespace DrakeToolbox.Logging
 {
     public struct OnLogNotificationEvent : IEvent
     {
